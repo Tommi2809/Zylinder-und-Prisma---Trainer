@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Körper-Rechentrainer: Zylinder & Prisma</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#121923;
+      --panel2:#0f1520;
+      --text:#e7eef8;
+      --muted:#9fb0c4;
+      --accent:#7cc4ff;
+      --ok:#7dffb2;
+      --warn:#ffd37d;
+      --bad:#ff7d7d;
+      --border:rgba(255,255,255,.12);
+      --shadow:rgba(0,0,0,.35);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    body{
+      margin:0; background:linear-gradient(180deg, #0b0f14, #070a0f);
+      color:var(--text); font-family:var(--sans);
+    }
+    header{
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
+      background:rgba(18,25,35,.75);
+      backdrop-filter: blur(6px);
+      position: sticky; top:0; z-index:10;
+    }
+    header h1{ margin:0; font-size:18px; font-weight:650; letter-spacing:.2px;}
+    header p{ margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.3;}
+    main{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:14px;
+      padding:14px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    @media (max-width: 980px){
+      main{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      box-shadow: 0 10px 30px var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+    }
+    .card .hd h2{ margin:0; font-size:14px; color:#dbe7f7; font-weight:650;}
+    .card .bd{ padding:14px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .field{ flex: 1 1 150px; min-width: 150px; }
+    label{ display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
+    select, input[type="text"], button{
+      width:100%;
+      box-sizing:border-box;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      padding:10px 10px;
+      font-size:14px;
+      outline:none;
+    }
+    select:focus, input:focus{ border-color: rgba(124,196,255,.7); }
+    .btnrow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    button{
+      cursor:pointer;
+      background:rgba(124,196,255,.16);
+      border-color: rgba(124,196,255,.35);
+      font-weight:650;
+    }
+    button.secondary{
+      background:rgba(255,255,255,.04);
+      border-color: var(--border);
+      font-weight:600;
+    }
+    button:active{ transform: translateY(1px); }
+    .pill{
+      font-size:12px; color:var(--muted);
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .taskbox{
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px dashed rgba(255,255,255,.18);
+      background:rgba(255,255,255,.03);
+    }
+    .taskbox h3{ margin:0 0 8px; font-size:14px; }
+    .kv{
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap:6px 10px;
+      font-size:14px;
+      line-height:1.35;
+      margin-top:8px;
+    }
+    .kv .k{ color:var(--muted); }
+    .kv .v{ font-family: var(--mono); }
+    .hint{ color:var(--muted); font-size:13px; margin-top:8px; line-height:1.35;}
+    .result{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      font-size:13px;
+      line-height:1.35;
+    }
+    .ok{ border-color: rgba(125,255,178,.4); background:rgba(125,255,178,.10); }
+    .warn{ border-color: rgba(255,211,125,.45); background:rgba(255,211,125,.10); }
+    .bad{ border-color: rgba(255,125,125,.45); background:rgba(255,125,125,.10); }
+    .sol{
+      margin-top:12px;
+      display:none;
+    }
+    .step{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px 12px;
+      background:rgba(255,255,255,.02);
+      margin:10px 0;
+    }
+    .step .st{
+      display:flex; gap:10px; align-items:baseline;
+      margin-bottom:8px;
+    }
+    .step .num{
+      width:28px; height:28px; border-radius:9px;
+      display:inline-flex; align-items:center; justify-content:center;
+      background:rgba(124,196,255,.18);
+      border:1px solid rgba(124,196,255,.35);
+      color:#dbefff; font-weight:800;
+      font-size:13px;
+      flex:0 0 auto;
+    }
+    .step .ttl{ font-weight:750; }
+    .step .ct{
+      color:#dfe9f7;
+      font-size:13.5px;
+      line-height:1.45;
+    }
+    .formula{
+      font-family: var(--mono);
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      padding: 2px 6px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .small{ font-size:12px; color:var(--muted); }
+    .divider{ height:1px; background:var(--border); margin:12px 0; }
+    .inline{ display:inline-block; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Körper-Rechentrainer (Klasse 9): Zylinder & Prisma</h1>
+  <p>Aufgaben werden zufällig generiert. Runde am Ende auf <b>2 Nachkommastellen</b>. Musterlösung im 6-Schritte-Stil (Einheiten angleichen → Skizze → Formeln → Einsetzen → Umstellen → Antwort).</p>
+</header>
+
+<main>
+  <section class="card">
+    <div class="hd">
+      <h2>Einstellungen</h2>
+      <div class="pill" id="pillMode">Einheiten: gemischt möglich</div>
+    </div>
+    <div class="bd">
+      <div class="row">
+        <div class="field">
+          <label for="shape">Körper</label>
+          <select id="shape">
+            <option value="cylinder">Zylinder</option>
+            <option value="prism">Prisma (gerades Prisma)</option>
+          </select>
+        </div>
+        <div class="field" id="baseField" style="display:none;">
+          <label for="base">Grundfläche (Prisma)</label>
+          <select id="base">
+            <option value="rt">rechtwinkliges Dreieck</option>
+            <option value="tri">allgemeines Dreieck</option>
+            <option value="trap">Trapez</option>
+            <option value="para">Parallelogramm</option>
+            <option value="rhomb">Raute</option>
+            <option value="kite">Drachenviereck</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div class="field">
+          <label for="taskType">Aufgabentyp</label>
+          <select id="taskType">
+            <option value="V">Volumen (V)</option>
+            <option value="O">Oberfläche (O)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="difficulty">Schwierigkeit</label>
+          <select id="difficulty">
+            <option value="mix">gemischt</option>
+            <option value="easy">leicht</option>
+            <option value="mid">mittel</option>
+            <option value="hard">schwer</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div class="field">
+          <label for="unitMode">Einheitenmodus</label>
+          <select id="unitMode">
+            <option value="mix">gemischt / zufällig</option>
+            <option value="cm">nur cm</option>
+            <option value="dm">nur dm</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="piMode">π verwenden</label>
+          <select id="piMode">
+            <option value="pi">mit π (intern exakt, Anzeige Dezimal)</option>
+            <option value="314">π ≈ 3,14 (nur Anzeige, Rechnen intern exakt)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button id="newTask">Neue Aufgabe</button>
+        <button class="secondary" id="toggleSolution" disabled>Musterlösung anzeigen</button>
+      </div>
+
+      <div class="divider"></div>
+      <div class="small">
+        Hinweise:
+        <ul style="margin:8px 0 0 18px; padding:0; color:var(--muted);">
+          <li>Es werden keine Winkelsätze und kein Satz des Pythagoras benötigt (alle nötigen Längen werden gegeben).</li>
+          <li>Bei Zylinder kann <span class="formula">r</span> auch aus <span class="formula">O</span> gesucht sein (quadratische Gleichung, Wurzeln sind erlaubt).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="hd">
+      <h2>Aufgabe & Lösung</h2>
+      <div class="pill" id="pillInfo">—</div>
+    </div>
+    <div class="bd">
+      <div class="taskbox">
+        <h3 id="taskTitle">Klicke auf „Neue Aufgabe“.</h3>
+        <div class="kv" id="givenList"></div>
+        <div class="hint" id="wantedLine"></div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <div class="field" style="flex: 1 1 240px;">
+            <label for="answer">Dein Ergebnis</label>
+            <input id="answer" type="text" placeholder="z.B. 514,29" disabled />
+          </div>
+          <div class="field" style="flex: 0 0 180px; min-width:180px;">
+            <label>Einheit</label>
+            <input id="ansUnit" type="text" disabled />
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <button id="check" disabled>Prüfen</button>
+          <button class="secondary" id="clear" disabled>Zurücksetzen</button>
+        </div>
+
+        <div id="feedback" class="result" style="display:none;"></div>
+
+        <div class="sol" id="solution"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/** =========================
+ *  Utility: random, rounding
+ *  ========================= */
+const R = {
+  int(min, max){ return Math.floor(Math.random()*(max-min+1))+min; },
+  choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; },
+  shuffle(arr){
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+};
+
+function parseUserNumber(s){
+  if(!s) return NaN;
+  // allow comma decimal, ignore spaces
+  const t = s.trim().replace(/\s+/g,'').replace(',', '.');
+  return Number(t);
+}
+function round2(x){ return Math.round((x + Number.EPSILON) * 100) / 100; }
+function fmt2(x){
+  // German decimal comma, 2 decimals
+  return round2(x).toFixed(2).replace('.', ',');
+}
+function fmtMaybeInt(x){
+  // show integers without .00 else with 2 decimals
+  const r = round2(x);
+  const isInt = Math.abs(r - Math.round(r)) < 1e-9;
+  return (isInt ? String(Math.round(r)) : r.toFixed(2).replace('.', ','));
+}
+function near(a,b,eps=0.005){ return Math.abs(a-b) <= eps; }
+
+/** =========================
+ *  Units: internal base in cm
+ *  We store "true" numeric values internally in:
+ *    length: cm
+ *    area: cm^2
+ *    vol: cm^3
+ *  Display can be cm or dm for each quantity.
+ *  ========================= */
+const Units = {
+  toDisplay(valueInternal, kind, unit){ // unit: "cm" or "dm"
+    if(unit === "cm") return valueInternal;
+    if(unit === "dm"){
+      if(kind === "L") return valueInternal / 10;
+      if(kind === "A") return valueInternal / 100;
+      if(kind === "V") return valueInternal / 1000;
+    }
+    throw new Error("Unknown unit conversion");
+  },
+  toInternal(valueDisplay, kind, unit){
+    if(unit === "cm") return valueDisplay;
+    if(unit === "dm"){
+      if(kind === "L") return valueDisplay * 10;
+      if(kind === "A") return valueDisplay * 100;
+      if(kind === "V") return valueDisplay * 1000;
+    }
+    throw new Error("Unknown unit conversion");
+  },
+  unitLabel(kind, unit){
+    if(kind === "L") return unit;
+    if(kind === "A") return unit + "²";
+    if(kind === "V") return unit + "³";
+    return unit;
+  }
+};
+
+/** =========================
+ *  Math helpers
+ *  ========================= */
+const PI = Math.PI;
+
+function piDisplayMode(){
+  return document.getElementById("piMode").value; // "pi" or "314"
+}
+function piText(){
+  return (piDisplayMode()==="314") ? "3,14" : "π";
+}
+function piValueForDisplay(){
+  return (piDisplayMode()==="314") ? 3.14 : Math.PI;
+}
+
+/** =========================
+ *  Shape modules
+ *  Each generator returns a task object:
+ *    task = {
+ *      shape: "cylinder" | "prism",
+ *      base: optional,
+ *      taskType: "V"|"O",
+ *      unknownKey: string,
+ *      given: { key: {kind:"L|A|V", internal:number, unit:"cm|dm", display:number, label:string} ... },
+ *      answer: { kind, internal, unit, displayRounded2 }, // expected rounded to 2 dp in displayed unit
+ *      meta: { title, unitMode, difficulty, note }
+ *      solutionSteps: [ {title, html} ... ] (computed at generation time)
+ *    }
+ *  ========================= */
+
+function unitMode(){
+  return document.getElementById("unitMode").value; // mix|cm|dm
+}
+
+function pickUnitFor(kind){
+  const mode = unitMode();
+  if(mode === "cm") return "cm";
+  if(mode === "dm") return "dm";
+  // mix: 50/50 per quantity kind (but consistent per variable)
+  return (Math.random() < 0.55) ? "cm" : "dm";
+}
+
+function packGiven(key, kind, internalValue, preferredUnit=null){
+  const unit = preferredUnit || pickUnitFor(kind);
+  const display = Units.toDisplay(internalValue, kind, unit);
+  return {
+    kind, internal: internalValue, unit,
+    display,
+    label: `${key}`
+  };
+}
+
+function makeAnswer(kind, internalValue, unit){
+  const display = Units.toDisplay(internalValue, kind, unit);
+  return {
+    kind,
+    internal: internalValue,
+    unit,
+    display,
+    rounded2: round2(display)
+  };
+}
+
+/** ========= Base areas and perimeters =========
+ * All computed using internal cm units.
+ * We DO NOT rely on Pythagoras; we always take needed sides/heights directly.
+ */
+const Bases = {
+  rt(){ // "rechtwinkliges Dreieck" but no Pythagoras use: give all sides + g and h_g
+    // Generate consistent but not derived: g and h are independent; sides for perimeter given
+    const g = R.int(4, 14);
+    const hg = R.int(3, 12);
+    // sides for perimeter: keep triangle inequality
+    let a = R.int(4, 16), b = R.int(4, 16), c;
+    // Choose c such that inequality holds
+    const minC = Math.abs(a-b)+1;
+    const maxC = a+b-1;
+    c = R.int(Math.max(minC,4), Math.min(maxC,20));
+    const G = (g*hg)/2;
+    const u = a+b+c;
+    return {
+      name: "rechtwinkliges Dreieck",
+      params: { g, hg, a, b, c },
+      area: G,
+      perim: u,
+      areaFormula: "G = (g · h_g) / 2",
+      perimFormula: "u = a + b + c"
+    };
+  },
+  tri(){ // allgemeines Dreieck
+    const g = R.int(5, 18);
+    const hg = R.int(3, 14);
+    // perimeter sides
+    let a = R.int(5, 18), b = R.int(5, 18), c;
+    const minC = Math.abs(a-b)+1;
+    const maxC = a+b-1;
+    c = R.int(Math.max(minC,5), Math.min(maxC,22));
+    const G = (g*hg)/2;
+    const u = a+b+c;
+    return {
+      name: "allgemeines Dreieck",
+      params: { g, hg, a, b, c },
+      area: G,
+      perim: u,
+      areaFormula: "G = (g · h_g) / 2",
+      perimFormula: "u = a + b + c"
+    };
+  },
+  trap(){ // Trapez
+    const a = R.int(6, 20);
+    const c = R.int(4, 18);
+    const h = R.int(3, 14);
+    const b = R.int(4, 18);
+    const d = R.int(4, 18);
+    const G = ((a+c)*h)/2;
+    const u = a+b+c+d;
+    return {
+      name: "Trapez",
+      params: { a, b, c, d, h },
+      area: G,
+      perim: u,
+      areaFormula: "G = ((a + c) · h) / 2",
+      perimFormula: "u = a + b + c + d"
+    };
+  },
+  para(){ // Parallelogramm
+    const g = R.int(6, 22);
+    const hg = R.int(3, 14);
+    const a = g; // alias
+    const b = R.int(4, 18);
+    const G = g*hg;
+    const u = 2*(a+b);
+    return {
+      name: "Parallelogramm",
+      params: { a, b, g, hg },
+      area: G,
+      perim: u,
+      areaFormula: "G = g · h_g",
+      perimFormula: "u = 2 · (a + b)"
+    };
+  },
+  rhomb(){ // Raute as special parallelogram: G=a*h_a, u=4a
+    const a = R.int(5, 18);
+    const ha = R.int(3, 14);
+    const G = a*ha;
+    const u = 4*a;
+    return {
+      name: "Raute",
+      params: { a, ha },
+      area: G,
+      perim: u,
+      areaFormula: "G = a · h_a",
+      perimFormula: "u = 4 · a"
+    };
+  },
+  kite(){ // Drachenviereck: area via diagonals, perimeter via side pairs
+    const e = R.int(6, 22);
+    const f = R.int(6, 22);
+    const a = R.int(4, 16);
+    const b = R.int(4, 16);
+    const G = (e*f)/2;
+    const u = 2*(a+b);
+    return {
+      name: "Drachenviereck",
+      params: { e, f, a, b },
+      area: G,
+      perim: u,
+      areaFormula: "G = (e · f) / 2",
+      perimFormula: "u = 2 · (a + b)"
+    };
+  }
+};
+
+/** =========================
+ *  Cylinder task generator
+ *  ========================= */
+function genCylinder(taskType, difficulty){
+  // choose template based on taskType and difficulty
+  // templates: want hK or r
+  const templatesV = [
+    { id:"V_h", unknown:"hK", given:["V","r"] },
+    { id:"V_r", unknown:"r",  given:["V","hK"] }
+  ];
+  const templatesO = [
+    { id:"O_h", unknown:"hK", given:["O","r"] },
+    { id:"O_r", unknown:"r",  given:["O","hK"] } // quadratic
+  ];
+
+  function chooseTemplate(){
+    const pool = (taskType==="V") ? templatesV : templatesO;
+    if(difficulty==="easy"){
+      return pool.find(t => t.unknown==="hK") || pool[0];
+    }
+    if(difficulty==="hard"){
+      return pool.find(t => t.unknown==="r") || pool[pool.length-1];
+    }
+    if(difficulty==="mid"){
+      // mid prefers r from V (sqrt) over r from O (quadratic)
+      if(taskType==="V") return templatesV.find(t=>t.id==="V_r") || pool[0];
+      if(taskType==="O") return templatesO.find(t=>t.id==="O_h") || pool[0];
+    }
+    return R.choice(pool);
+  }
+
+  const tpl = chooseTemplate();
+
+  // internal generate: pick r (cm) and hK (cm), compute V/O internal.
+  const r = R.int(3, 12);       // cm
+  const hK = R.int(6, 28);      // cm
+
+  const V = PI * r*r * hK;      // cm^3
+  const O = 2*PI*r*r + 2*PI*r*hK; // cm^2
+
+  // Given selection uses unit picking per quantity:
+  // r, hK are lengths; V is volume; O is area
+  const given = {};
+  let unknownKey = tpl.unknown;
+
+  // For display: choose units for givens. In mix mode these can differ.
+  // Ensure answer unit chosen sensibly: length unit for r/hK; keep independent.
+  const rUnit = pickUnitFor("L");
+  const hUnit = pickUnitFor("L");
+  const vUnit = pickUnitFor("V");
+  const oUnit = pickUnitFor("A");
+
+  // Build givens per template
+  if(tpl.given.includes("r")) given["r"] = packGiven("r", "L", r, rUnit);
+  if(tpl.given.includes("hK")) given["h_K"] = packGiven("h_K", "L", hK, hUnit);
+  if(tpl.given.includes("V")) given["V"] = packGiven("V", "V", V, vUnit);
+  if(tpl.given.includes("O")) given["O"] = packGiven("O", "A", O, oUnit);
+
+  // Determine answer internal:
+  let ansInternal, ansKind, ansUnit;
+  if(unknownKey==="hK"){
+    ansKind="L";
+    ansUnit = hUnit; // make answer unit = same as h_K typical, but if h_K not given then use length unit
+    if(!tpl.given.includes("hK")) ansUnit = pickUnitFor("L");
+    ansInternal = hK;
+  } else if(unknownKey==="r"){
+    ansKind="L";
+    ansUnit = rUnit;
+    if(!tpl.given.includes("r")) ansUnit = pickUnitFor("L");
+    ansInternal = r;
+  } else {
+    throw new Error("Unknown unknownKey");
+  }
+  const answer = makeAnswer(ansKind, ansInternal, ansUnit);
+
+  // Build solution steps (6)
+  const steps = buildCylinderSolutionSteps({
+    taskType, tplId:tpl.id,
+    r, hK, V, O,
+    given, answer,
+    units: { rUnit, hUnit, vUnit, oUnit, ansUnit }
+  });
+
+  const title = (taskType==="V") ? "Zylinder – Volumen" : "Zylinder – Oberfläche";
+  const note = (unknownKey==="r" && taskType==="O")
+    ? "Hinweis: Es entsteht eine quadratische Gleichung in r."
+    : "";
+
+  return {
+    shape: "cylinder",
+    base: null,
+    taskType,
+    unknownKey: (unknownKey==="hK" ? "h_K" : "r"),
+    given,
+    answer,
+    meta: { title, note }
+  , solutionSteps: steps };
+}
+
+function buildCylinderSolutionSteps(ctx){
+  const { taskType, tplId, r, hK, V, O, given, answer, units } = ctx;
+
+  // Step 1: units
+  const convLines = [];
+  // If any given quantity is in dm, show conversion to cm-based internal for that kind
+  for(const [k,obj] of Object.entries(given)){
+    const kind = obj.kind;
+    if(obj.unit==="dm"){
+      const internal = obj.internal; // already in cm-based internal
+      const disp = obj.display;
+      const inLabel = Units.unitLabel(kind, "dm");
+      const outLabel = Units.unitLabel(kind, "cm");
+      convLines.push(`- ${obj.label} = <span class="formula">${fmtMaybeInt(disp)} ${inLabel}</span> = <span class="formula">${fmtMaybeInt(internal)} ${outLabel}</span>`);
+    }
+  }
+  const step1 = convLines.length
+    ? `<div>Wir gleichen die Einheiten an (alles in <span class="formula">cm</span>, <span class="formula">cm²</span>, <span class="formula">cm³</span>):</div>
+       <div style="margin-top:6px;">${convLines.join("<br>")}</div>`
+    : `<div>Alle Größen sind bereits in passenden Einheiten angegeben. (Kein Umrechnen nötig.)</div>`;
+
+  // Step 2: given/unknown
+  const givenList = Object.values(given).map(g => {
+    const ul = Units.unitLabel(g.kind, g.unit);
+    return `- ${g.label} = <span class="formula">${fmtMaybeInt(g.display)} ${ul}</span>`;
+  }).join("<br>");
+  const unknownLabel = (answer.kind==="L") ? Units.unitLabel("L", answer.unit) : "";
+  const step2 = `<div><b>Gegeben:</b><br>${givenList}</div>
+                 <div style="margin-top:8px;"><b>Gesucht:</b> <span class="formula">${(ctx.tplId.includes("_r") ? "r" : "h_K")}</span> in <span class="formula">${unknownLabel}</span></div>
+                 <div class="small" style="margin-top:8px;">Skizze: Zylinder mit Radius r und Körperhöhe h_K.</div>`;
+
+  // Step 3: formulas (use G, u schema)
+  const step3 = `<div>Wir nutzen das Schema (wie in der Formelsammlung):</div>
+    <div style="margin-top:6px;">
+      - <span class="formula">G = ${piText()} · r²</span><br>
+      - <span class="formula">u = 2 · ${piText()} · r</span><br>
+      - <span class="formula">V = G · h_K</span><br>
+      - <span class="formula">M = u · h_K</span><br>
+      - <span class="formula">O = 2G + M</span>
+    </div>`;
+
+  // Step 4-5 depend on template
+  let step4 = "", step5 = "", step6 = "";
+
+  if(taskType==="V" && tplId==="V_h"){
+    // hK = V / (pi r^2)
+    const Vdisp = given["V"].display;
+    const rdisp = given["r"].display;
+    const Vunit = Units.unitLabel("V", given["V"].unit);
+    const runit = Units.unitLabel("L", given["r"].unit);
+    step4 = `<div>Aus <span class="formula">V = ${piText()} · r² · h_K</span> folgt:</div>
+             <div style="margin-top:6px;"><span class="formula">h_K = V / (${piText()} · r²)</span></div>`;
+    step5 = `<div>Einsetzen:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K = ${fmtMaybeInt(Vdisp)} ${Vunit} / (${piText()} · (${fmtMaybeInt(rdisp)} ${runit})²)</span>
+             </div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Die Körperhöhe beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  if(taskType==="V" && tplId==="V_r"){
+    // r = sqrt(V/(pi hK))
+    const Vdisp = given["V"].display;
+    const hdisp = given["h_K"].display;
+    const Vunit = Units.unitLabel("V", given["V"].unit);
+    const hunit = Units.unitLabel("L", given["h_K"].unit);
+    step4 = `<div>Aus <span class="formula">V = ${piText()} · r² · h_K</span> folgt:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">r² = V / (${piText()} · h_K)</span><br>
+               <span class="formula">r = √( V / (${piText()} · h_K) )</span>
+             </div>`;
+    step5 = `<div>Einsetzen:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">r = √( ${fmtMaybeInt(Vdisp)} ${Vunit} / (${piText()} · ${fmtMaybeInt(hdisp)} ${hunit}) )</span>
+             </div>
+             <div style="margin-top:6px;">
+               <span class="formula">r ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Der Radius beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  if(taskType==="O" && tplId==="O_h"){
+    // O = 2pi r^2 + 2pi r hK  => hK = (O - 2pi r^2)/(2pi r)
+    const Odisp = given["O"].display;
+    const rdisp = given["r"].display;
+    const Ounit = Units.unitLabel("A", given["O"].unit);
+    const runit = Units.unitLabel("L", given["r"].unit);
+    step4 = `<div>Aus <span class="formula">O = 2${piText()} r² + 2${piText()} r h_K</span> folgt:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">2${piText()} r h_K = O - 2${piText()} r²</span><br>
+               <span class="formula">h_K = (O - 2${piText()} r²) / (2${piText()} r)</span>
+             </div>`;
+    step5 = `<div>Einsetzen:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K = (${fmtMaybeInt(Odisp)} ${Ounit} - 2${piText()} · (${fmtMaybeInt(rdisp)} ${runit})²) / (2${piText()} · ${fmtMaybeInt(rdisp)} ${runit})</span>
+             </div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Die Körperhöhe beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  if(taskType==="O" && tplId==="O_r"){
+    // quadratic in r: O=2πr²+2πr h => r²+h r - O/(2π)=0; positive root
+    const Odisp = given["O"].display;
+    const hdisp = given["h_K"].display;
+    const Ounit = Units.unitLabel("A", given["O"].unit);
+    const hunit = Units.unitLabel("L", given["h_K"].unit);
+    step4 = `<div>Aus <span class="formula">O = 2${piText()} r² + 2${piText()} r h_K</span> folgt eine quadratische Gleichung:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">0 = 2${piText()} r² + 2${piText()} h_K r - O</span><br>
+               <span class="formula">0 = r² + h_K r - O/(2${piText()})</span>
+             </div>`;
+    step5 = `<div>Mit der Mitternachtsformel (für <span class="formula">r² + h_K r - O/(2${piText()}) = 0</span>):</div>
+             <div style="margin-top:6px;">
+               <span class="formula">r = ( -h_K ± √( h_K² + 2O/${piText()} ) ) / 2</span>
+             </div>
+             <div style="margin-top:10px;">Einsetzen:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">r = ( -${fmtMaybeInt(hdisp)} ${hunit} + √( (${fmtMaybeInt(hdisp)} ${hunit})² + 2·${fmtMaybeInt(Odisp)} ${Ounit}/${piText()} ) ) / 2</span>
+             </div>
+             <div style="margin-top:8px;">
+               Wir nehmen nur die <b>positive</b> Lösung, da <span class="formula">r &gt; 0</span>.
+             </div>
+             <div style="margin-top:8px;">
+               <span class="formula">r ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Der Radius beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  return [
+    {title:"Einheiten angleichen", html:step1},
+    {title:"Skizze / Gegeben / Gesucht", html:step2},
+    {title:"Formeln notieren", html:step3},
+    {title:"Umformen", html:step4},
+    {title:"Einsetzen & Berechnen", html:step5},
+    {title:"Antwort", html:step6}
+  ];
+}
+
+/** =========================
+ *  Prism task generator
+ *  ========================= */
+function genPrism(taskType, baseKey, difficulty){
+  const base = Bases[baseKey]();
+  const baseName = base.name;
+
+  // choose body height (internal cm)
+  const hK = R.int(6, 28);
+  const G = base.area;
+  const u = base.perim;
+  const V = G * hK;
+  const O = 2*G + u*hK;
+
+  // Define templates for prism
+  // - V: unknown hK OR unknown base height (linear)
+  // - O: unknown hK OR unknown one perimeter side (linear) (ensure we gave all others)
+  const templates = [];
+
+  // always allow hK from V or O
+  if(taskType==="V") templates.push({ id:"V_hK", unknown:"h_K" });
+  if(taskType==="O") templates.push({ id:"O_hK", unknown:"h_K" });
+
+  // allow "unknown base height" from V given hK and base params (only if base formula linear in that height)
+  if(taskType==="V"){
+    if(baseKey==="rt" || baseKey==="tri"){
+      templates.push({ id:"V_hg", unknown:"h_g" }); // from G=(g*hg)/2
+    }
+    if(baseKey==="trap"){
+      templates.push({ id:"V_h", unknown:"h" }); // from G=((a+c)*h)/2
+    }
+    if(baseKey==="para"){
+      templates.push({ id:"V_hg", unknown:"h_g" }); // from G=g*hg
+    }
+    if(baseKey==="rhomb"){
+      templates.push({ id:"V_ha", unknown:"h_a" }); // from G=a*ha
+    }
+    if(baseKey==="kite"){
+      templates.push({ id:"V_f", unknown:"f" }); // from G=(e*f)/2, solve for f
+    }
+  }
+
+  // allow "unknown side from O" (perimeter linear)
+  if(taskType==="O"){
+    if(baseKey==="para"){
+      templates.push({ id:"O_b", unknown:"b" }); // u=2(a+b)
+    }
+    if(baseKey==="rhomb"){
+      templates.push({ id:"O_a", unknown:"a" }); // u=4a
+    }
+    if(baseKey==="trap"){
+      templates.push({ id:"O_b", unknown:"b" }); // u=a+b+c+d
+    }
+    if(baseKey==="tri" || baseKey==="rt"){
+      templates.push({ id:"O_a", unknown:"a" }); // u=a+b+c
+    }
+    if(baseKey==="kite"){
+      templates.push({ id:"O_a", unknown:"a" }); // u=2(a+b)
+    }
+  }
+
+  function chooseTemplate(){
+    if(difficulty==="easy"){
+      return templates.find(t => t.unknown==="h_K") || templates[0];
+    }
+    if(difficulty==="hard"){
+      // prefer non-hK if available
+      const nonHK = templates.filter(t => t.unknown!=="h_K");
+      return nonHK.length ? R.choice(nonHK) : templates[0];
+    }
+    if(difficulty==="mid"){
+      // prefer base height over side-from-O
+      const heightish = templates.filter(t => ["h_g","h","h_a","f"].includes(t.unknown));
+      if(heightish.length) return R.choice(heightish);
+      return templates.find(t=>t.unknown==="h_K") || templates[0];
+    }
+    return R.choice(templates);
+  }
+
+  const tpl = chooseTemplate();
+
+  // Units
+  const hUnit = pickUnitFor("L");
+  const vUnit = pickUnitFor("V");
+  const oUnit = pickUnitFor("A");
+
+  // We will present base parameters as lengths (L) always, but each can be in cm or dm (mix mode).
+  // The computed V and O will be shown in vUnit/oUnit.
+  // For fairness, if unknown is some length, its unit = same as that parameter's displayed unit.
+  const given = {};
+
+  // Include the "result quantity" (V or O) as given
+  if(taskType==="V") given["V"] = packGiven("V","V",V,vUnit);
+  if(taskType==="O") given["O"] = packGiven("O","A",O,oUnit);
+
+  // Always include body height h_K as given unless it is unknown
+  if(tpl.unknown!=="h_K"){
+    given["h_K"] = packGiven("h_K","L",hK,hUnit);
+  }
+
+  // Add base parameters, omitting the unknown one (if it's a base param)
+  const p = {...base.params};
+
+  // Map unknown key to a param name in base.params (or none if unknown is h_K)
+  const omitKey = (tpl.unknown==="h_K") ? null : tpl.unknown;
+
+  // For templates requiring perimeter-side unknown from O, we must still give enough to compute G (for O equation).
+  // We'll ensure G-related params are present even if not needed in u.
+  // We'll include all base params except omitKey.
+  const paramUnits = {};
+  for(const key of Object.keys(p)){
+    paramUnits[key] = pickUnitFor("L");
+  }
+
+  for(const [key,val] of Object.entries(p)){
+    if(key === omitKey) continue;
+    // rename displayed keys for consistency (e.g. hg -> h_g, ha -> h_a)
+    const label = key;
+    const displayKey = (key==="hg") ? "h_g" : (key==="ha") ? "h_a" : key;
+    given[displayKey] = packGiven(displayKey,"L",val,paramUnits[key]);
+  }
+
+  // Determine answer
+  let ansInternal, ansKind="L", ansUnit;
+  if(tpl.unknown==="h_K"){
+    ansInternal = hK;
+    ansUnit = hUnit;
+    // if h_K not given, still ok
+  } else {
+    // unknown base param:
+    // map display key back to internal param key
+    let internalKey = tpl.unknown;
+    if(internalKey==="h_g") internalKey="hg";
+    if(internalKey==="h_a") internalKey="ha";
+    ansInternal = p[internalKey];
+    ansUnit = paramUnits[internalKey] || pickUnitFor("L");
+  }
+  const answer = makeAnswer(ansKind, ansInternal, ansUnit);
+
+  const steps = buildPrismSolutionSteps({
+    taskType, baseKey, base, hK, G, u, V, O,
+    tplId: tpl.id, omitKey: tpl.unknown,
+    given, answer
+  });
+
+  const title = (taskType==="V")
+    ? `Prisma (${baseName}) – Volumen`
+    : `Prisma (${baseName}) – Oberfläche`;
+
+  const note = (tpl.unknown!=="h_K")
+    ? `Gesucht variiert: ${tpl.unknown}`
+    : "";
+
+  return {
+    shape:"prism",
+    base: baseKey,
+    taskType,
+    unknownKey: tpl.unknown,
+    given,
+    answer,
+    meta:{ title, note, baseName },
+    solutionSteps: steps
+  };
+}
+
+function buildPrismSolutionSteps(ctx){
+  const { taskType, base, baseKey, hK, G, u, V, O, tplId, omitKey, given, answer } = ctx;
+
+  // Step 1: unit conversions to cm-based
+  const convLines = [];
+  for(const [k,obj] of Object.entries(given)){
+    if(obj.unit==="dm"){
+      const kind=obj.kind;
+      const inLabel = Units.unitLabel(kind, "dm");
+      const outLabel = Units.unitLabel(kind, "cm");
+      convLines.push(`- ${obj.label} = <span class="formula">${fmtMaybeInt(obj.display)} ${inLabel}</span> = <span class="formula">${fmtMaybeInt(obj.internal)} ${outLabel}</span>`);
+    }
+  }
+  const step1 = convLines.length
+    ? `<div>Wir gleichen die Einheiten an (alles in <span class="formula">cm</span>, <span class="formula">cm²</span>, <span class="formula">cm³</span>):</div>
+       <div style="margin-top:6px;">${convLines.join("<br>")}</div>`
+    : `<div>Alle Größen sind bereits in passenden Einheiten angegeben. (Kein Umrechnen nötig.)</div>`;
+
+  // Step 2: given/unknown + "sketch"
+  const givenList = Object.values(given).map(g => {
+    const ul = Units.unitLabel(g.kind, g.unit);
+    return `- ${g.label} = <span class="formula">${fmtMaybeInt(g.display)} ${ul}</span>`;
+  }).join("<br>");
+  const unknownUnitLabel = Units.unitLabel("L", answer.unit);
+  const step2 = `<div><b>Gegeben:</b><br>${givenList}</div>
+                 <div style="margin-top:8px;"><b>Gesucht:</b> <span class="formula">${ctx.omitKey}</span> in <span class="formula">${unknownUnitLabel}</span></div>
+                 <div class="small" style="margin-top:8px;">Skizze: gerades Prisma mit Grundfläche und Körperhöhe h_K.</div>`;
+
+  // Step 3: formulas
+  const baseAreaFormula = base.areaFormula;
+  const basePerimFormula = base.perimFormula;
+
+  const step3 = `<div>Formeln:</div>
+    <div style="margin-top:6px;">
+      Grundfläche: <span class="formula">${baseAreaFormula}</span><br>
+      Umfang: <span class="formula">${basePerimFormula}</span><br>
+      Prisma: <span class="formula">V = G · h_K</span>, <span class="formula">M = u · h_K</span>, <span class="formula">O = 2G + M</span>
+    </div>`;
+
+  // Step 4 & 5 depend on template
+  let step4="", step5="", step6="";
+
+  // Helper to reference givens easily (display values + units)
+  function g(key){
+    // stored with key already mapped (e.g. "h_g")
+    return given[key];
+  }
+  function showVal(key){
+    const obj = given[key];
+    const ul = Units.unitLabel(obj.kind, obj.unit);
+    return `${fmtMaybeInt(obj.display)} ${ul}`;
+  }
+
+  // Compute G and u from internal values, but show substitution with display values where helpful.
+  // We'll describe structure rather than expanding every numeric step for all bases (keeps readable).
+
+  // Template: find h_K from V
+  if(taskType==="V" && tplId==="V_hK"){
+    step4 = `<div>Aus <span class="formula">V = G · h_K</span> folgt:</div>
+             <div style="margin-top:6px;"><span class="formula">h_K = V / G</span></div>`;
+    step5 = `<div>1) Zuerst Grundfläche <span class="formula">G</span> berechnen:</div>
+             <div style="margin-top:6px;">${renderBaseCompute(base)}</div>
+             <div style="margin-top:10px;">2) Dann in <span class="formula">h_K = V / G</span> einsetzen:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K = ${fmtMaybeInt(g("V").display)} ${Units.unitLabel("V", g("V").unit)} / G</span>
+             </div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Die Körperhöhe beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  // Template: find h_K from O
+  if(taskType==="O" && tplId==="O_hK"){
+    step4 = `<div>Aus <span class="formula">O = 2G + u · h_K</span> folgt:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">u · h_K = O - 2G</span><br>
+               <span class="formula">h_K = (O - 2G) / u</span>
+             </div>`;
+    step5 = `<div>1) Zuerst <span class="formula">G</span> und <span class="formula">u</span> der Grundfläche berechnen:</div>
+             <div style="margin-top:6px;">${renderBaseCompute(base, true)}</div>
+             <div style="margin-top:10px;">2) Dann in <span class="formula">h_K = (O - 2G) / u</span> einsetzen:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K = (${fmtMaybeInt(g("O").display)} ${Units.unitLabel("A", g("O").unit)} - 2G) / u</span>
+             </div>
+             <div style="margin-top:6px;">
+               <span class="formula">h_K ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Die Körperhöhe beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  // Template: unknown base height from V (triangle h_g / trapez h / para h_g / rhomb h_a / kite f)
+  if(taskType==="V" && ["V_hg","V_h","V_ha","V_f"].includes(tplId)){
+    const unknown = omitKey; // e.g. h_g, h, h_a, f
+    step4 = `<div>Zuerst aus <span class="formula">V = G · h_K</span> die Grundfläche:</div>
+             <div style="margin-top:6px;"><span class="formula">G = V / h_K</span></div>`;
+    step5 = `<div>1) Grundfläche aus dem Volumen:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">G = ${fmtMaybeInt(g("V").display)} ${Units.unitLabel("V", g("V").unit)} / ${showVal("h_K")}</span>
+             </div>
+             <div style="margin-top:10px;">2) Dann in die Flächenformel der Grundfläche einsetzen und nach <span class="formula">${unknown}</span> umstellen:</div>
+             <div style="margin-top:6px;">${renderBaseSolveFor(baseKey, base, unknown)}</div>
+             <div style="margin-top:8px;">
+               <span class="formula">${unknown} ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Der gesuchte Wert beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  // Template: unknown side from O (linear via u)
+  if(taskType==="O" && ["O_b","O_a"].includes(tplId)){
+    const unknown = omitKey; // a or b
+    step4 = `<div>Aus <span class="formula">O = 2G + u · h_K</span> folgt:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">u = (O - 2G) / h_K</span>
+             </div>`;
+    step5 = `<div>1) Grundfläche <span class="formula">G</span> berechnen:</div>
+             <div style="margin-top:6px;">${renderBaseCompute(base, false, true /*onlyG*/)}</div>
+             <div style="margin-top:10px;">2) Umfang aus der Oberfläche:</div>
+             <div style="margin-top:6px;">
+               <span class="formula">u = (${fmtMaybeInt(g("O").display)} ${Units.unitLabel("A", g("O").unit)} - 2G) / ${showVal("h_K")}</span>
+             </div>
+             <div style="margin-top:10px;">3) In die Umfangsformel einsetzen und nach <span class="formula">${unknown}</span> umstellen:</div>
+             <div style="margin-top:6px;">${renderPerimSolveFor(baseKey, base, unknown)}</div>
+             <div style="margin-top:8px;">
+               <span class="formula">${unknown} ≈ ${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>
+             </div>`;
+    step6 = `<div><b>Antwort:</b> Der gesuchte Wert beträgt <span class="formula">${fmt2(answer.display)} ${Units.unitLabel("L", answer.unit)}</span>.</div>`;
+  }
+
+  return [
+    {title:"Einheiten angleichen", html:step1},
+    {title:"Skizze / Gegeben / Gesucht", html:step2},
+    {title:"Formeln notieren", html:step3},
+    {title:"Umformen", html:step4},
+    {title:"Einsetzen & Berechnen", html:step5},
+    {title:"Antwort", html:step6}
+  ];
+}
+
+function renderBaseCompute(base, includeU=true, onlyG=false){
+  // Show formulas with the generated numeric internal values (cm-based), but keep general style.
+  const p = base.params;
+  const lines = [];
+  lines.push(`<div><span class="formula">${base.areaFormula}</span></div>`);
+  // give substitution using internal cm numbers (keeps unit conversion already done)
+  // We'll show with variable names as in formula:
+  // Create a readable substitution string based on base type
+  const name = base.name;
+  if(name.includes("Dreieck")){
+    lines.push(`<div style="margin-top:6px;"><span class="formula">G = (${p.g} · ${p.hg}) / 2 = ${fmt2(base.area)} cm²</span></div>`);
+  } else if(name==="Trapez"){
+    lines.push(`<div style="margin-top:6px;"><span class="formula">G = ((${p.a} + ${p.c}) · ${p.h}) / 2 = ${fmt2(base.area)} cm²</span></div>`);
+  } else if(name==="Parallelogramm"){
+    lines.push(`<div style="margin-top:6px;"><span class="formula">G = ${p.g} · ${p.hg} = ${fmt2(base.area)} cm²</span></div>`);
+  } else if(name==="Raute"){
+    lines.push(`<div style="margin-top:6px;"><span class="formula">G = ${p.a} · ${p.ha} = ${fmt2(base.area)} cm²</span></div>`);
+  } else if(name==="Drachenviereck"){
+    lines.push(`<div style="margin-top:6px;"><span class="formula">G = (${p.e} · ${p.f}) / 2 = ${fmt2(base.area)} cm²</span></div>`);
+  }
+
+  if(onlyG) return lines.join("");
+
+  if(includeU){
+    lines.push(`<div style="margin-top:10px;"><span class="formula">${base.perimFormula}</span></div>`);
+    if(name.includes("Dreieck")){
+      lines.push(`<div style="margin-top:6px;"><span class="formula">u = ${p.a} + ${p.b} + ${p.c} = ${fmt2(base.perim)} cm</span></div>`);
+    } else if(name==="Trapez"){
+      lines.push(`<div style="margin-top:6px;"><span class="formula">u = ${p.a} + ${p.b} + ${p.c} + ${p.d} = ${fmt2(base.perim)} cm</span></div>`);
+    } else if(name==="Parallelogramm"){
+      lines.push(`<div style="margin-top:6px;"><span class="formula">u = 2 · (${p.a} + ${p.b}) = ${fmt2(base.perim)} cm</span></div>`);
+    } else if(name==="Raute"){
+      lines.push(`<div style="margin-top:6px;"><span class="formula">u = 4 · ${p.a} = ${fmt2(base.perim)} cm</span></div>`);
+    } else if(name==="Drachenviereck"){
+      lines.push(`<div style="margin-top:6px;"><span class="formula">u = 2 · (${p.a} + ${p.b}) = ${fmt2(base.perim)} cm</span></div>`);
+    }
+  }
+  return lines.join("");
+}
+
+function renderBaseSolveFor(baseKey, base, unknown){
+  const p = base.params;
+  // We assume we computed G = V/hK already; show algebraic solve for unknown
+  // We'll plug in the internal values for a clean numeric final statement.
+  if((baseKey==="tri"||baseKey==="rt") && unknown==="h_g"){
+    // G = (g*hg)/2 => hg = 2G/g
+    return `<div>
+      <span class="formula">G = (g · h_g) / 2</span> ⇒ <span class="formula">h_g = 2G / g</span>
+      <div style="margin-top:6px;"><span class="formula">h_g = 2G / ${p.g}</span></div>
+    </div>`;
+  }
+  if(baseKey==="trap" && unknown==="h"){
+    // G=((a+c)*h)/2 => h = 2G/(a+c)
+    return `<div>
+      <span class="formula">G = ((a + c) · h) / 2</span> ⇒ <span class="formula">h = 2G / (a + c)</span>
+      <div style="margin-top:6px;"><span class="formula">h = 2G / (${p.a} + ${p.c})</span></div>
+    </div>`;
+  }
+  if(baseKey==="para" && unknown==="h_g"){
+    // G=g*hg => hg = G/g
+    return `<div>
+      <span class="formula">G = g · h_g</span> ⇒ <span class="formula">h_g = G / g</span>
+      <div style="margin-top:6px;"><span class="formula">h_g = G / ${p.g}</span></div>
+    </div>`;
+  }
+  if(baseKey==="rhomb" && unknown==="h_a"){
+    // G=a*ha => ha = G/a
+    return `<div>
+      <span class="formula">G = a · h_a</span> ⇒ <span class="formula">h_a = G / a</span>
+      <div style="margin-top:6px;"><span class="formula">h_a = G / ${p.a}</span></div>
+    </div>`;
+  }
+  if(baseKey==="kite" && unknown==="f"){
+    // G=(e*f)/2 => f = 2G/e
+    return `<div>
+      <span class="formula">G = (e · f) / 2</span> ⇒ <span class="formula">f = 2G / e</span>
+      <div style="margin-top:6px;"><span class="formula">f = 2G / ${p.e}</span></div>
+    </div>`;
+  }
+  return `<div>Umstellen für <span class="formula">${unknown}</span> ist für diese Grundfläche nicht definiert.</div>`;
+}
+
+function renderPerimSolveFor(baseKey, base, unknown){
+  const p = base.params;
+  // u already computed from O; solve for unknown in perim formula
+  if((baseKey==="tri"||baseKey==="rt") && unknown==="a"){
+    // u = a+b+c => a = u - b - c
+    return `<div>
+      <span class="formula">u = a + b + c</span> ⇒ <span class="formula">a = u - b - c</span>
+      <div style="margin-top:6px;"><span class="formula">a = u - ${p.b} - ${p.c}</span></div>
+    </div>`;
+  }
+  if(baseKey==="trap" && unknown==="b"){
+    // u = a+b+c+d => b = u - a - c - d
+    return `<div>
+      <span class="formula">u = a + b + c + d</span> ⇒ <span class="formula">b = u - a - c - d</span>
+      <div style="margin-top:6px;"><span class="formula">b = u - ${p.a} - ${p.c} - ${p.d}</span></div>
+    </div>`;
+  }
+  if(baseKey==="para" && unknown==="b"){
+    // u = 2(a+b) => b = u/2 - a
+    return `<div>
+      <span class="formula">u = 2 · (a + b)</span> ⇒ <span class="formula">a + b = u/2</span> ⇒ <span class="formula">b = u/2 - a</span>
+      <div style="margin-top:6px;"><span class="formula">b = u/2 - ${p.a}</span></div>
+    </div>`;
+  }
+  if(baseKey==="rhomb" && unknown==="a"){
+    // u=4a => a=u/4
+    return `<div>
+      <span class="formula">u = 4 · a</span> ⇒ <span class="formula">a = u / 4</span>
+      <div style="margin-top:6px;"><span class="formula">a = u / 4</span></div>
+    </div>`;
+  }
+  if(baseKey==="kite" && unknown==="a"){
+    // u=2(a+b) => a = u/2 - b
+    return `<div>
+      <span class="formula">u = 2 · (a + b)</span> ⇒ <span class="formula">a + b = u/2</span> ⇒ <span class="formula">a = u/2 - b</span>
+      <div style="margin-top:6px;"><span class="formula">a = u/2 - ${p.b}</span></div>
+    </div>`;
+  }
+  return `<div>Umstellen für <span class="formula">${unknown}</span> ist für diese Grundfläche nicht definiert.</div>`;
+}
+
+/** =========================
+ *  UI Rendering
+ *  ========================= */
+let CURRENT_TASK = null;
+let SOL_VISIBLE = false;
+
+function setBaseVisibility(){
+  const shape = document.getElementById("shape").value;
+  document.getElementById("baseField").style.display = (shape==="prism") ? "" : "none";
+}
+
+function updatePillInfo(){
+  const u = unitMode();
+  const pill = document.getElementById("pillMode");
+  pill.textContent = (u==="mix") ? "Einheiten: gemischt möglich" : (u==="cm" ? "Einheiten: nur cm" : "Einheiten: nur dm");
+}
+
+function renderTask(task){
+  const taskTitle = document.getElementById("taskTitle");
+  const givenList = document.getElementById("givenList");
+  const wantedLine = document.getElementById("wantedLine");
+  const pillInfo = document.getElementById("pillInfo");
+  const ansUnit = document.getElementById("ansUnit");
+
+  taskTitle.textContent = task.meta.title;
+  pillInfo.textContent = task.meta.note ? task.meta.note : (task.shape==="prism" ? task.meta.baseName : "—");
+
+  // render givens in stable order: V/O first, then others
+  const keys = Object.keys(task.given);
+  const priority = ["V","O","h_K","r","g","h_g","a","b","c","d","h","h_a","e","f"];
+  keys.sort((k1,k2) => (priority.indexOf(k1)-priority.indexOf(k2)));
+
+  givenList.innerHTML = "";
+  for(const k of keys){
+    const g = task.given[k];
+    const ul = Units.unitLabel(g.kind, g.unit);
+    const rowK = document.createElement("div");
+    rowK.className = "k";
+    rowK.textContent = g.label + ":";
+    const rowV = document.createElement("div");
+    rowV.className = "v";
+    rowV.textContent = `${fmtMaybeInt(g.display)} ${ul}`;
+    givenList.appendChild(rowK);
+    givenList.appendChild(rowV);
+  }
+
+  // wanted line
+  const unknown = task.unknownKey;
+  const uLabel = Units.unitLabel(task.answer.kind, task.answer.unit);
+  wantedLine.innerHTML = `<b>Gesucht:</b> <span class="formula">${unknown}</span> in <span class="formula">${uLabel}</span> (auf 2 Nachkommastellen runden).`;
+
+  // answer unit
+  ansUnit.value = uLabel;
+
+  // enable controls
+  document.getElementById("answer").disabled = false;
+  document.getElementById("check").disabled = false;
+  document.getElementById("clear").disabled = false;
+  document.getElementById("toggleSolution").disabled = false;
+
+  document.getElementById("answer").value = "";
+  hideFeedback();
+  hideSolution();
+  SOL_VISIBLE = false;
+  document.getElementById("toggleSolution").textContent = "Musterlösung anzeigen";
+}
+
+function hideFeedback(){
+  const fb = document.getElementById("feedback");
+  fb.style.display = "none";
+  fb.className = "result";
+  fb.textContent = "";
+}
+
+function showFeedback(kind, html){
+  const fb = document.getElementById("feedback");
+  fb.style.display = "";
+  fb.className = "result " + kind;
+  fb.innerHTML = html;
+}
+
+function renderSolution(task){
+  const sol = document.getElementById("solution");
+  sol.innerHTML = "";
+  task.solutionSteps.forEach((s, idx) => {
+    const div = document.createElement("div");
+    div.className = "step";
+    div.innerHTML = `
+      <div class="st">
+        <div class="num">${idx+1}</div>
+        <div class="ttl">${s.title}</div>
+      </div>
+      <div class="ct">${s.html}</div>
+    `;
+    sol.appendChild(div);
+  });
+}
+
+function showSolution(){
+  const sol = document.getElementById("solution");
+  sol.style.display = "";
+}
+function hideSolution(){
+  const sol = document.getElementById("solution");
+  sol.style.display = "none";
+}
+
+function checkAnswer(){
+  if(!CURRENT_TASK) return;
+
+  const raw = document.getElementById("answer").value;
+  const y = parseUserNumber(raw);
+  if(!Number.isFinite(y)){
+    showFeedback("warn", "Bitte gib eine Zahl ein (z.B. <span class='formula'>12,34</span>).");
+    return;
+  }
+
+  const expected = CURRENT_TASK.answer.rounded2; // in display unit
+  const exactDisplay = CURRENT_TASK.answer.display; // not rounded
+
+  const y2 = round2(y);
+
+  // Check if student's value matches rounded expected
+  if(near(y2, expected, 0.005)){
+    showFeedback("ok",
+      `Richtig. Erwarteter Rundwert: <span class="formula">${fmt2(expected)} ${Units.unitLabel(CURRENT_TASK.answer.kind, CURRENT_TASK.answer.unit)}</span>.`
+    );
+    return;
+  }
+
+  // Wrong rounding check: close to exact but not to rounded expected
+  if(near(y, exactDisplay, 0.005) && !near(y2, expected, 0.005)){
+    showFeedback("warn",
+      `Fast. Dein Wert liegt nahe am exakten Ergebnis, aber er ist nicht korrekt auf <b>2 Nachkommastellen</b> gerundet.<br>
+       Korrekt gerundet: <span class="formula">${fmt2(expected)} ${Units.unitLabel(CURRENT_TASK.answer.kind, CURRENT_TASK.answer.unit)}</span>.`
+    );
+    return;
+  }
+
+  // Otherwise wrong
+  showFeedback("bad",
+    `Leider falsch.<br>
+     Korrekt (auf 2 Nachkommastellen): <span class="formula">${fmt2(expected)} ${Units.unitLabel(CURRENT_TASK.answer.kind, CURRENT_TASK.answer.unit)}</span>.`
+  );
+}
+
+function clearInput(){
+  document.getElementById("answer").value = "";
+  hideFeedback();
+}
+
+/** =========================
+ *  Task creation
+ *  ========================= */
+function difficultyMode(){
+  return document.getElementById("difficulty").value; // mix|easy|mid|hard
+}
+function pickDifficulty(){
+  const d = difficultyMode();
+  if(d !== "mix") return d;
+  return R.choice(["easy","mid","hard"]);
+}
+
+function makeTask(){
+  const shape = document.getElementById("shape").value;
+  const taskType = document.getElementById("taskType").value; // V or O
+  const diff = pickDifficulty();
+
+  updatePillInfo();
+
+  let task;
+  if(shape==="cylinder"){
+    task = genCylinder(taskType, diff);
+  } else {
+    const base = document.getElementById("base").value;
+    task = genPrism(taskType, base, diff);
+  }
+
+  // Compute solution steps now that task is created
+  // (already in generators; keep here for safety)
+  renderTask(task);
+  renderSolution(task);
+
+  CURRENT_TASK = task;
+}
+
+/** =========================
+ *  Event bindings
+ *  ========================= */
+document.getElementById("shape").addEventListener("change", () => {
+  setBaseVisibility();
+});
+document.getElementById("unitMode").addEventListener("change", updatePillInfo);
+
+document.getElementById("newTask").addEventListener("click", () => {
+  makeTask();
+});
+document.getElementById("check").addEventListener("click", () => {
+  checkAnswer();
+});
+document.getElementById("clear").addEventListener("click", () => {
+  clearInput();
+});
+document.getElementById("toggleSolution").addEventListener("click", () => {
+  if(!CURRENT_TASK) return;
+  SOL_VISIBLE = !SOL_VISIBLE;
+  if(SOL_VISIBLE){
+    showSolution();
+    document.getElementById("toggleSolution").textContent = "Musterlösung verbergen";
+  } else {
+    hideSolution();
+    document.getElementById("toggleSolution").textContent = "Musterlösung anzeigen";
+  }
+});
+
+// initial
+setBaseVisibility();
+updatePillInfo();
+</script>
+</body>
+</html>
